@@ -192,3 +192,10 @@ build/
 
 tmp/
 task-*
+
+/compose/kong/logs/access.log
+/compose/kong/logs/admin_access.log
+/compose/kong/logs/admin_gui_access.log
+/compose/kong/logs/admin_gui_error.log
+/compose/kong/logs/status_error.log
+/compose/kong/logs/error.log
