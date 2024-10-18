@@ -1,0 +1,57 @@
+@startuml
+title Диаграмма компонента Системы Умный дом - Device Service
+
+!include <C4/C4_Component>
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/devicons/java.puml
+!include $ICONURL/devicons/postgresql.puml
+
+Container_Boundary(deviceServiceContainer, "Device Service") {
+
+    Component(deviceController, "Device Controller", "Java, Spring Boot", "Обрабатывает запросы на управление данными об устройстве, запрос на отправку команды на устройстве", $sprite="java")
+    Component(deviceTypeController, "Device Type Controller", "Java, Spring Boot", "Обрабатывает запросы на управление данными о типе устройстве", $sprite="java")
+    Component(deviceService, "Device Service", "Java, Spring Boot", "Управляет бизнес-логикой для данных о устройстве, отправляет команду на устройство", $sprite="java")
+    Component(deviceTypeService, "Device Type Service", "Java, Spring Boot", "Управляет бизнес-логикой для данных о типе устройства", $sprite="java")
+    Component(deviceRepository, "Device Repository", "Java, Spring Data JPA", "Обрабатывает запросы к хранилищам данных устройств", $sprite="java")
+    Component(deviceTypeRepository, "Device Type Repository", "Spring Data JPA", "Обрабатывает запросы к хранилищам данных типов устройств", $sprite="java")
+
+    Rel(deviceController, deviceService, "Вызов бизнес-логики")
+    Rel(deviceTypeController, deviceTypeService, "Вызов бизнес-логики")
+    Rel(deviceService, deviceRepository, "Чтение-запись данных о устройстве")
+    Rel(deviceService, deviceTypeRepository, "Чтение данных о типе устройства")
+    Rel(deviceTypeService, deviceTypeRepository, "Чтение-запись данных о типе устройства")
+}
+
+ContainerDb(deviceDB, "Device DB", "PostgreSQL", "Хранит данные об устройствах", $sprite="postgresql")
+
+Rel(deviceRepository, deviceDB, "Чтение-запись данных об устройстве", "SQL/TCP")
+Rel(deviceTypeRepository, deviceDB, "Чтение-запись данных о типе устройства", "SQL/TCP")
+
+Container(apiGateway, "АPI Gateway", "Kusk", "Маршрутизирует запросы, балансирует нагрузки, осуществляет аутентификацию, авторизацию и кеширование")
+Container(houseService, "House Service", "Java, Spring Boot", "Управляет данными о домах и модулях", $sprite="java")
+Container(scenarioService, "Scenario Service", "Java, Spring Boot", "Управляет данными о сценариях использования устройств", $sprite="java")
+Container(telemetryService, "Telemetry Service", "Java, Spring Boot", "Осуществляет сбор и анализ телеметрии с устройств", $sprite="java", $link="SmartHome_Component_TelemetryService.puml")
+
+Rel(apiGateway, deviceController, "Чтение-запись данных об устройстве / отправляет команду на устройство", "REST API")
+Rel(apiGateway, deviceTypeController, "Чтение-запись данных о типе устройства", "REST API")
+Rel_L(deviceService, houseService, "Проверяет существования идентификатора модуля устройства", "REST API")
+Rel_R(houseService, deviceTypeController, "Проверяет существования идентификатора типа устройства", "REST API")
+Rel_R(deviceService, scenarioService, "Проверяет существования идентификатора сценария использования устройства", "REST API")
+Rel_L(scenarioService, deviceController, "Передает команду для устройства", "REST API")
+Rel_R(deviceService, telemetryService, "Получает IP адрес и порт устройства", "REST API")
+Rel_L(telemetryService, deviceController, "Проверяет существования идентификатора устройства", "REST API")
+
+System_Boundary(devices, "Устройства") {
+    System_Ext(heatingDevice, "Heating Device", "Управляет отопительной системой дома")
+    System_Ext(digitalVideoRecorder, "Digital Video Recorder", "Управляет видеорегистратором")
+    System_Ext(lightingDevice, "Lighting Device", "Управляет освещением в доме")
+    System_Ext(gateDevice, "Gate Device", "Управляет воротами дома")
+}
+
+Rel(deviceService, heatingDevice, "Отправляет команду для отопительной системы дома", "REST API")
+Rel(deviceService, digitalVideoRecorder, "Отправляет команду для видеорегистратора", "REST API")
+Rel(deviceService, lightingDevice, "Отправляет команду для устройств освещения в доме", "REST API")
+Rel(deviceService, gateDevice, "Отправляет команду для ворот дома", "REST API")
+
+@enduml

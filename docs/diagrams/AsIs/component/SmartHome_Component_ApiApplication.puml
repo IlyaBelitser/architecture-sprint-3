@@ -1,0 +1,39 @@
+@startuml
+title Диаграмма компонента Системы Умный дом - API Application
+
+!include <C4/C4_Component>
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/devicons/react.puml
+!include $ICONURL/devicons/postgresql.puml
+
+Container(spa, "Single-Page App", "React JS", "Предоставляет пользователям все функции системы Умный дом через веб-браузер", $sprite="react")
+Container(mobileApp, "Mobile App", "React Native", "Предоставляет пользователям все функции системы Умный дом через мобильное устройство", $sprite="react")
+
+Container_Boundary(backEndApp, "API Application") {
+
+    Component(controller, "Heating System Controller", "Spring MVC Rest Controller")
+    Component(service, "Heating System Service", "Java Spring")
+    Component(temperatureSensorRepository, "Temperature Sensor Repository", "Java Spring")
+    Component(heatingSystemRepository, "Heating System Repository", "Java Spring")
+
+    Rel(controller, service, "Вызывает бизнес логику отопительной системы")
+    Rel(service, temperatureSensorRepository, "Чтение / запись данных датчика температуры")
+    Rel(service, heatingSystemRepository, "Чтение / запись данных системы отопления")
+}
+
+ContainerDb(database, "Database", "PostgreSQL", "Хранит информацию о датчиках температуры, системы отопления, регистрации пользователей, учетные данные аутентификации, журналы доступа и т. д.", $sprite="postgresql")
+
+System_Ext(heatingSystem, "Heating System", "Управляет отоплением в доме")
+System_Ext(temperatureSensor, "Temperature Sensor", "Предоставляет текущую температуру в доме")
+
+Rel(temperatureSensorRepository, database, "Чтение / запись данных датчика температуры", "SQL/JDBC")
+Rel(heatingSystemRepository, database, "Чтение / запись данных системы отопления", "SQL/JDBC")
+
+Rel(spa, controller, "Получает данные о температуре, отправляет команды", "REST API")
+Rel(mobileApp, controller, "Получает данные о температуре, отправляет команды", "REST API")
+
+Rel_Neighbor(controller, heatingSystem, "Отправляет команды", "REST API")
+Rel(controller, temperatureSensor, "Получает данные о текущей температуре в доме", "REST API")
+
+@enduml

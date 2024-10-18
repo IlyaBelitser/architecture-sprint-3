@@ -1,0 +1,100 @@
+openapi: 3.1.0
+info:
+  title: Telemetry Service API
+  description: API микросервиса телеметрии, который осуществляет сбор и анализ телеметрии с устройств.
+  version: 0.1.0
+
+paths:
+  /api/devices/{id}/telemetry/latest:
+    get:
+      summary: Получение последних данных телеметрии
+      description: Возвращает последнее полученное значение телеметрии для устройства.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Уникальный идентификатор устройства
+          example: '7c19761d-a3c4-4f42-9ae1-ed9850ffd381'
+      responses:
+        '200':
+          description: Последние данные телеметрии возвращены
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: Уникальный идентификатор телеметрии
+                    example: '7c19761d-a3c4-4f42-9ae1-ed9850ffd381'
+                  deviceId:
+                    type: string
+                    format: uuid
+                    description: Уникальный идентификатор устройства, который отправил телеметрию
+                    example: '7c19761d-a3c4-4f42-9ae1-ed9850ffd381'
+                  data:
+                    type: string
+                    description: Данные телеметрии
+                  receivedAt:
+                    type: string
+                    format: date-time
+                    example: '2024-10-09T14:12:28Z'
+                    description: Дата и время получения телеметрии
+                  ipAndPort:
+                    type: string
+                    description: Ip адрес и порт устройства, который отправил телеметрию
+                    example: '192.168.0.5:8080'
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка сервера
+
+  /api/devices/{id}/telemetry:
+    post:
+      summary: Запись данных телеметрии
+      description: Записывает новые данные телеметрии для устройства.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Уникальный идентификатор устройства
+          example: '7c19761d-a3c4-4f42-9ae1-ed9850ffd381'
+      requestBody:
+        description: Данные телеметрии для записи
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: string
+                  description: Данные телеметрии
+                receivedAt:
+                  type: string
+                  format: date-time
+                  example: '2024-10-09T14:12:28Z'
+                  description: Дата и время получения телеметрии
+                ipAndPort:
+                  type: string
+                  description: Ip адрес и порт устройства, который отправил телеметрию
+                  example: '192.168.0.5:8080'
+              required:
+                - data
+                - receivedAt
+      responses:
+        '201':
+          description: Данные телеметрии успешно записаны
+        '400':
+          description: Некорректный запрос
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка сервера

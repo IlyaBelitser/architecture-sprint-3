@@ -1,0 +1,9 @@
+package ru.yandex.practicum.device.exception.notFound;
+
+import java.util.UUID;
+
+public class DeviceNotFoundException extends RuntimeException {
+    public DeviceNotFoundException(UUID deviceId) {
+        super("Устройство с ID " + deviceId + " не найдено.");
+    }
+}

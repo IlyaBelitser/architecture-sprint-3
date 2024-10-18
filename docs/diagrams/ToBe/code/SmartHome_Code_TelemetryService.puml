@@ -1,0 +1,39 @@
+@startuml
+
+title Диаграмма кода Системы Умный дом - Telemetry Service
+
+left to right direction
+
+class Telemetry {
+        - UUID id
+        - UUID deviceId
+        - String data
+        - LocalDateTime receivedAt
+        - String ipAndPort
+}
+
+class TelemetryRepository {
+    + Telemetry findTopByDeviceIdOrderByReceivedAtDesc(UUID deviceId)
+    + Telemetry save(Telemetry telemetry)
+}
+
+class TelemetryServiceImpl {
+    - TelemetryRepository telemetryRepository
+
+    + TelemetryDto create(UUID id, CreateTelemetryDto telemetryDto)
+    + TelemetryDto getLatest(UUID id)
+}
+
+class TelemetryController {
+    - TelemetryService telemetryService
+
+    + ResponseEntity<TelemetryDto> create(UUID id, CreateTelemetryDto createTelemetryDto)
+    + ResponseEntity<TelemetryDto> getLatest(UUID id)
+}
+
+TelemetryController o-> TelemetryServiceImpl
+TelemetryServiceImpl o-> TelemetryRepository
+
+TelemetryRepository --> Telemetry
+
+@enduml

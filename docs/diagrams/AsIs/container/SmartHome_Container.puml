@@ -1,0 +1,35 @@
+@startuml
+title Диаграмма контейнера Системы Умный дом
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/devicons/react.puml
+!include $ICONURL/devicons/java.puml
+!include $ICONURL/devicons/postgresql.puml
+
+Person(user, "User", "Пользователь системы Умный дом")
+System_Boundary(SmartHomeSystem, "Smart Home System") {
+    Container(spa, "Single-Page App", "React JS", "Предоставляет пользователям все функции системы Умный дом через веб-браузер", $sprite="react")
+    Container(mobileApp, "Mobile App", "React Native", "Предоставляет пользователям все функции системы Умный дом через мобильное устройство", $sprite="react")
+
+    Container(ApiApp, "API Application", "Java, Spring Boot", "Предоставляет функциональность системы Умный дом через API", $link="../component/SmartHome_Component.puml", $sprite="java")
+
+    ContainerDb(database, "Database", "PostgreSQL", "Хранит информацию о датчиках температуры, системы отопления, регистрации пользователей, учетные данные аутентификации, журналы доступа и т. д.", $sprite="postgresql")
+
+    Rel(user, spa, "Получает данные о температуре, отправляет команды", "HTTPS")
+    Rel(user, mobileApp, "Получает данные о температуре, отправляет команды")
+
+    Rel(spa, ApiApp, "Получает данные о температуре, отправляет команды", "REST API")
+    Rel(mobileApp, ApiApp, "Получает данные о температуре, отправляет команды", "REST API")
+
+    Rel(ApiApp, database, "Чтение / запись", "SQL/JDBC")
+}
+
+System_Ext(heatingSystem, "Heating System", "Управляет отоплением в доме")
+System_Ext(temperatureSensor, "Temperature Sensor", "Предоставляет текущую температуру в доме")
+
+Rel_Neighbor(ApiApp, heatingSystem, "Отправляет команды", "REST API")
+Rel(ApiApp, temperatureSensor, "Получает данные о текущей температуре в доме", "REST API")
+
+@enduml
