@@ -1,0 +1,25 @@
+@startuml
+title Диаграмма контекста Умного дома
+
+!include <c4/C4_Context.puml>
+
+Person(user, "User", "Пользователь системы Умный дом")
+Person(admin, "Administrator", "Администратор системы Умный дом")
+System(SmartHomeSystem, "Smart Home System", "Управляет и осуществляет мониторинг устройств системы Умный дом", $link="../container/SmartHome_Container.puml")
+
+System_Ext(heatingDevice, "Heating Device", "Управляет отопительной системой дома")
+System_Ext(digitalVideoRecorder, "Digital Video Recorder", "Управляет видеорегистратором")
+System_Ext(lightingDevice, "Lighting Device", "Управляет освещением в доме")
+System_Ext(gateDevice, "Gate Device", "Управляет воротами дома")
+
+
+Rel(user, SmartHomeSystem, "Управляет и осуществляет мониторинг устройств умного дома")
+Rel(admin, SmartHomeSystem, "Администрирует систему Умный дом")
+
+BiRel(SmartHomeSystem, heatingDevice, "Управляет отопительной системой дома")
+BiRel(SmartHomeSystem, digitalVideoRecorder, "Управляет видеорегистратором")
+Rel(SmartHomeSystem, digitalVideoRecorder, "Осуществляет видео наблюдение")
+BiRel(SmartHomeSystem, lightingDevice, "Управляет освещением в доме")
+BiRel(SmartHomeSystem, gateDevice, "Управляет воротами дома")
+
+@enduml

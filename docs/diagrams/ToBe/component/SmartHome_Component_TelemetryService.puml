@@ -1,0 +1,30 @@
+@startuml
+title Диаграмма компонента Системы Умный дом - Telemetry Service
+
+!include <C4/C4_Component>
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/devicons/java.puml
+!include $ICONURL/devicons2/influxdb_original.puml
+
+Container_Boundary(telemetryServiceContainer, "Telemetry Service") {
+
+    Component(telemetryController, "Telemetry Controller", "Java, Spring Boot", "Обрабатывает запросы на управление данными телеметрии устройства", $sprite="java")
+    Component(telemetryService, "Telemetry Service", "Java, Spring Boot", "Управляет бизнес-логикой для данных о телеметрии устройства", $sprite="java")
+    Component(telemetryRepository, "Telemetry Repository", "Java, Spring Data JPA", "Обрабатывает запросы к хранилищам данных о телеметрии устройства", $sprite="java")
+
+    Rel(telemetryController, telemetryService, "Вызов бизнес-логики")
+    Rel(telemetryService, telemetryRepository, "Чтение-запись данных о телеметрии устройства")
+}
+
+ContainerDb(telemetryDB, "Telemetry DB", "InfluxDB", "Хранит данные о телеметрии устройства", $sprite="influxdb_original")
+Rel(telemetryRepository, telemetryDB, "Чтение-запись данных о телеметрии устройства", "InfluxQL/TCP")
+
+Container(apiGateway, "АPI Gateway", "Kusk", "Маршрутизирует запросы, балансирует нагрузки, осуществляет аутентификацию, авторизацию и кеширование")
+Container(deviceService, "Device Service", "Java, Spring Boot", "Управляет данными об устройствах, отправляет команды на устройства", $sprite="java", $link="SmartHome_Component_DeviceService.puml")
+
+Rel(apiGateway, telemetryController, "Чтение-запись телеметрии устройства", "REST API")
+Rel(telemetryService, deviceService, "Проверяет существования идентификатора устройства", "REST API")
+Rel(deviceService, telemetryController, "Получает IP адрес и порт устройства", "REST API")
+
+@enduml

@@ -1,0 +1,87 @@
+@startuml
+title Диаграмма контейнера Системы Умный дом
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+'!include <C4/C4_Component>
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/devicons/react.puml
+!include $ICONURL/devicons/java.puml
+!include $ICONURL/devicons/postgresql.puml
+!include $ICONURL/devicons2/influxdb_original.puml
+
+Person(user, "Пользователь", "Пользователь системы Умный дом")
+Person(admin, "Администратор", "Администратор системы Умный дом")
+System_Boundary(system, "Система Умный дом") {
+    Container(spa, "Single-Page App", "React JS", "Предоставляет пользователям все функции системы Умный дом через веб-браузер", $sprite="react")
+    Container(mobileApp, "Mobile App", "React Native", "Предоставляет пользователям все функции системы Умный дом через мобильное устройство", $sprite="react")
+
+    Container(apiGateway, "АPI Gateway", "Kong", "Маршрутизирует запросы, балансирует нагрузки, осуществляет аутентификацию, авторизацию и кеширование")
+
+    Container(userService, "User Service", "Java, Spring Boot", "Управляет данными о пользователях, ролях и разрешениях пользователя", $sprite="java")
+    Container(deviceService, "Device Service", "Java, Spring Boot", "Управляет данными об устройствах, отправляет команды на устройства", $sprite="java", $link="../component/SmartHome_Component_DeviceService.puml")
+    Container(houseService, "House Service", "Java, Spring Boot", "Управляет данными о домах и модулях", $sprite="java")
+    Container(telemetryService, "Telemetry Service", "Java, Spring Boot", "Осуществляет сбор и анализ телеметрии с устройств", $sprite="java", $link="../component/SmartHome_Component_TelemetryService.puml")
+    Container(scenarioService, "Scenario Service", "Java, Spring Boot", "Управляет данными о сценариях использования устройств", $sprite="java")
+
+    ContainerDb(userDB, "User DB", "PostgreSQL", "Хранит данные о пользователях, ролях и разрешениях пользователя", $sprite="postgresql")
+    ContainerDb(deviceDB, "Device DB", "PostgreSQL", "Хранит данные об устройствах", $sprite="postgresql")
+    ContainerDb(houseDB, "House DB", "PostgreSQL", "Хранит данные о домах и модулях", $sprite="postgresql")
+    ContainerDb(telemetryDB, "Telemetry DB", "InfluxDB", "Хранит телеметрию с устройств", $sprite="influxdb_original")
+    ContainerDb(scenarioDB, "Scenario DB", "PostgreSQL", "Хранит данные о сценариях использования устройств", $sprite="postgresql")
+
+    Rel_Down(userService, userDB, "Чтение-запись данных о пользователе, ролях и разрешениях пользователя", "SQL/TCP")
+    Lay_Down(userService, userDB)
+    Rel_Down(deviceService, deviceDB, "Чтение-запись данных об устройстве", "SQL/TCP")
+    Lay_Down(deviceService, deviceDB)
+    Rel_Down(houseService, houseDB, "Чтение-запись данных о доме и модуле", "SQL/TCP")
+    Lay_Down(houseService, houseDB)
+    Rel_Down(telemetryService, telemetryDB, "Чтение-запись данных телеметрии устройства", "InfluxQL/TCP")
+    Lay_Down(telemetryService, telemetryDB)
+    Rel_Down(scenarioService, scenarioDB, "Чтение-запись данных о сценарии использования устройства", "SQL/TCP")
+    Lay_Down(scenarioService, scenarioDB)
+
+    Rel(apiGateway, userService, "Чтение-запись данных о пользователе, роли и разрешении", "REST API")
+    Rel(apiGateway, deviceService, "Чтение-запись данных о устройстве / отправляет команду на устройство", "REST API")
+    Rel(deviceService, houseService, "Проверяет существования идентификатора модуля устройства", "REST API")
+    Rel(deviceService, scenarioService, "Проверяет существования идентификатора сценария использования устройства", "REST API")
+    Rel(deviceService, telemetryService, "Получает IP адрес и порт устройства", "REST API")
+    Rel(apiGateway, houseService, "Чтение-запись данных о доме и модуле", "REST API")
+    Rel(houseService, userService, "Проверяет существования идентификатора пользователя", "REST API")
+    Rel(houseService, deviceService, "Проверяет существования идентификатора типа устройства", "REST API")
+    Rel(apiGateway, telemetryService, "Чтение-запись телеметрии устройства", "REST API")
+    Rel(telemetryService, deviceService, "Проверяет существования идентификатора устройства", "REST API")
+    Rel(apiGateway, scenarioService, "Чтение-запись сценарий использования устройства", "REST API")
+    Rel(scenarioService, deviceService, "Передает команду для устройства", "REST API")
+    Rel(scenarioService, userService, "Проверяет существования идентификатора пользователя", "REST API")
+
+    Rel(spa, apiGateway, "Управляет и осуществляет мониторинг устройств умного дома", "REST API")
+    Rel(mobileApp, apiGateway, "Управляет и осуществляет мониторинг устройств умного дома", "REST API")
+}
+
+System_Boundary(devices, "Устройства") {
+    System_Ext(heatingDevice, "Heating Device", "Управляет отопительной системой дома")
+    System_Ext(digitalVideoRecorder, "Digital Video Recorder", "Управляет видеорегистратором")
+    System_Ext(lightingDevice, "Lighting Device", "Управляет освещением в доме")
+    System_Ext(gateDevice, "Gate Device", "Управляет воротами дома")
+}
+
+Rel(spa, digitalVideoRecorder, "Осуществляет видео наблюдение", "WebSocket")
+Rel(mobileApp, digitalVideoRecorder, "Осуществляет видео наблюдение", "WebSocket")
+
+Rel(user, spa, "Управляет и осуществляет мониторинг устройств умного дома", "HTTPS")
+Rel(user, mobileApp, "Управляет и осуществляет мониторинг устройств умного дома")
+Rel(admin, spa, "Администрирует систему Умный дом", "HTTPS")
+Rel(admin, mobileApp, "Администрирует систему Умный дом")
+
+Rel(heatingDevice, apiGateway, "Передает телеметрию и принимает команду для отопительной системой дома", "REST API")
+Rel(digitalVideoRecorder, apiGateway, "Передает телеметрию и принимает команду для видеорегистратора", "REST API")
+Rel(lightingDevice, apiGateway, "Передает телеметрию и принимает команду для устройств освещения в доме", "REST API")
+Rel(gateDevice, apiGateway, "Передает телеметрию и принимает команду для ворот дома", "REST API")
+
+Rel(deviceService, heatingDevice, "Отправляет команду для отопительной системы дома", "REST API")
+Rel(deviceService, digitalVideoRecorder, "Отправляет команду для видеорегистратора", "REST API")
+Rel(deviceService, lightingDevice, "Отправляет команду для устройств освещения в доме", "REST API")
+Rel(deviceService, gateDevice, "Отправляет команду для ворот дома", "REST API")
+
+@enduml

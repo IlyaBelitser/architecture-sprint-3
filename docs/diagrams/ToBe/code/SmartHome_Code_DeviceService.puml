@@ -1,0 +1,88 @@
+@startuml
+
+title Диаграмма кода Системы Умный дом - Device Service
+
+left to right direction
+
+class Device {
+        - UUID id
+        - DeviceType type
+        - UUID moduleId
+        - UUID scenarioId
+        - String name
+        - String serialNumber
+        - Double currentValue
+        - Double targetValue
+        - String status
+}
+
+class DeviceType {
+        - UUID id
+        - String name
+        - String description
+}
+
+class DeviceRepository {
+    + Optional<Device> findById(UUID deviceId)
+    + Device save(Device device)
+    + void deleteById(UUID id)
+}
+
+class DeviceTypeRepository {
+    + Optional<DeviceType> findById(UUID deviceTypeId)
+}
+
+class DeviceServiceImpl {
+    - DeviceRepository deviceRepository
+    - DeviceTypeRepository deviceTypeRepository
+
+    + DeviceDto create(CreateDeviceDto deviceDto)
+    + DeviceDto get(UUID deviceId)
+    + DeviceDto update(UUID deviceId, UpdateDeviceDto deviceDto)
+    + void delete(UUID deviceId)
+    + void setStatus(UUID deviceId, String status)
+    + void execute(UUID deviceId, String command)
+}
+
+class DeviceTypeServiceImpl {
+    - DeviceTypeRepository deviceTypeRepository
+
+    + DeviceTypeDto create(CreateDeviceTypeDto createDeviceTypeDto)
+    + DeviceTypeDto get(Long deviceTypeId)
+    + DeviceTypeDto update(Long deviceTypeId, UpdateDeviceTypeDto updateDeviceTypeDto)
+    + void delete(Long deviceTypeId)
+}
+
+class DeviceController {
+    - DeviceService deviceService
+
+    + ResponseEntity<DeviceDto> create(CreateDeviceDto createDeviceDto)
+    + ResponseEntity<DeviceDto> get(UUID id)
+    + ResponseEntity<DeviceDto> update(UUID id, UpdateDeviceDto updateDeviceDto)
+    + ResponseEntity<Void> delete(UUID id)
+    + ResponseEntity<Void> setStatus(UUID id, String status)
+    + ResponseEntity<Void> execute(UUID id, String command)
+}
+
+class DeviceTypeController {
+    - DeviceTypeService deviceTypeService
+
+    + ResponseEntity<DeviceTypeDto> create(CreateDeviceTypeDto createDeviceTypeDto)
+    + ResponseEntity<DeviceTypeDto> get(Long id)
+    + ResponseEntity<DeviceTypeDto> update(Long id, UpdateDeviceTypeDto updateDeviceTypeDto)
+    + ResponseEntity<Void> delete(Long id)
+}
+
+DeviceController o-> DeviceServiceImpl
+DeviceServiceImpl o-> DeviceRepository
+DeviceServiceImpl o-> DeviceTypeRepository
+
+DeviceRepository --> Device
+DeviceTypeRepository --> DeviceType
+
+DeviceTypeController o-> DeviceTypeServiceImpl
+DeviceTypeServiceImpl o-> DeviceTypeRepository
+
+Device --> DeviceType
+
+@enduml

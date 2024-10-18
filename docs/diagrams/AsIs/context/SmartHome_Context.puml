@@ -1,0 +1,16 @@
+@startuml
+title Диаграмма контекста Умного дома
+
+!include <C4/C4_Context.puml>
+
+Person(user, "User", "Пользователь системы Умный дом")
+System(SmartHomeSystem, "Smart Home System", "Устанавливает и мониторит температуру дома", $link="../container/SmartHome_Container.puml")
+
+System_Ext(heatingSystem, "Heating System", "Управляет отоплением в доме")
+System_Ext(temperatureSensor, "Temperature Sensor", "Предоставляет текущую температуру в доме")
+
+Rel(user, SmartHomeSystem, "Получает данные о температуре, отправляет команды")
+Rel(SmartHomeSystem, heatingSystem, "Отправляет команды")
+Rel(SmartHomeSystem, temperatureSensor, "Получает данные о текущей температуре в доме")
+
+@enduml

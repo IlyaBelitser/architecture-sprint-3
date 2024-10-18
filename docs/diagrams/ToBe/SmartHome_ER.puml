@@ -1,0 +1,120 @@
+@startuml
+entity User {
+  + Id: UUID (PK)
+  --
+  UserName: String
+  Email: String
+  Password: String
+  Token: String
+}
+
+entity Role {
+  + Id: UUID (PK)
+  --
+  Name: String
+  Description: String
+}
+
+entity UserRole {
+  + Id: UUID (PK)
+  --
+  # UserId: UUID (FK)
+  # RoleId: UUID (FK)
+  AssignedAt: DateTime
+}
+
+entity Permission {
+  + Id: UUID (PK)
+  --
+  Name: String
+  Description: String
+}
+
+entity RolePermission {
+  + Id: UUID (PK)
+  --
+  # RoleId: UUID (FK)
+  # PermissionId: UUID (FK)
+  GrantedAt: DateTime
+}
+
+entity House {
+  + Id: UUID (PK)
+  --
+  # UserId: UUID (FK)
+  Name: String
+  Address: String
+}
+
+entity Module {
+  + Id: UUID (PK)
+  --
+  # ModuleTypeId: UUID (FK)
+  # HouseId: UUID (FK)
+  # DeviceTypeId: Long (FK)
+  Name: String
+  SerialNumber: String
+}
+
+entity ModuleType {
+  + Id: UUID (PK)
+  --
+  Name: String
+  Description: String
+}
+
+entity Device {
+  + Id: UUID (PK)
+  --
+  # DeviceTypeId: Long (FK)
+  # ModuleId: UUID (FK)
+  # ScenarioId: UUID (FK)
+  Name: String
+  SerialNumber: String
+  CurrentValue: Double
+  TargetValue: Double
+  Status: String
+}
+
+entity DeviceType {
+  + Id: Long (PK)
+  --
+  Name: String
+  Description: String
+}
+
+entity Telemetry {
+  + Id: UUID (PK)
+  --
+  # DeviceId: UUID (FK)
+  Data: String
+  ReceivedAt: DateTime
+  IpAndPort: String
+}
+
+entity Scenario {
+  + Id: UUID (PK)
+  --
+  # UserId: UUID (FK)
+  Name: String
+  Description: String
+  Script: String
+  CreatedAt: DateTime
+  UpdatedAt: DateTime
+}
+
+User ||--o{ UserRole
+Role ||--o{ UserRole
+Role ||--o{ RolePermission
+Permission ||--o{ RolePermission
+User ||--o{ House
+Device }o--|| DeviceType
+House ||--o{ Module
+Module ||--o{ Device
+Module }o--|| ModuleType
+Module }o--|| DeviceType
+Device ||--o{ Telemetry
+Scenario }o-right-|| User
+Scenario ||--o{ Device
+
+@enduml
